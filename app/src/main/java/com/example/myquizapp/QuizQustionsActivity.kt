@@ -1,6 +1,7 @@
 package com.example.myquizapp
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,8 @@ import kotlinx.coroutines.processNextEventInCurrentThread
 
 class QuizQustionsActivity : AppCompatActivity(), View.OnClickListener {
 
+    private var mUserName: String? = null
+    private var mCorrectAnswers: Int = 0
     private var mCurrentPosition: Int = 1
     private var mQuestionsList:ArrayList<Question>? = null
     private var mSelectedOptionPosition :Int = 0
@@ -29,6 +32,8 @@ class QuizQustionsActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz_qustions)
+        mUserName = intent.getStringExtra(Constants.USER_NAME)
+
         progressBar = findViewById(R.id.progressBar)
         tvProgress = findViewById(R.id.tv_progress)
         tvQuestion = findViewById(R.id.tv_question)
@@ -125,18 +130,18 @@ class QuizQustionsActivity : AppCompatActivity(), View.OnClickListener {
             R.id.btn_submit->{
 
                 if (mSelectedOptionPosition == 0) {
-
                     mCurrentPosition++
-
                     when {
-
                         mCurrentPosition <= mQuestionsList!!.size -> {
-
                             setQuestion()
                         }
                         else -> {
-
-                            Toast.makeText(this, "You have successfully completed the quiz.", Toast.LENGTH_SHORT).show()
+                           val intent = Intent(this, ResultActivity::class.java)
+                            intent.putExtra(Constants.USER_NAME, mUserName)
+                            intent.putExtra(Constants.CORRECT_ANSWERS, mCorrectAnswers)
+                            intent.putExtra(Constants.TOTAL_QUESTIONS, mQuestionsList?.size)
+                            startActivity(intent)
+                            finish()
                         }
                     }
                 } else {
@@ -145,6 +150,9 @@ class QuizQustionsActivity : AppCompatActivity(), View.OnClickListener {
                     // This is to check if the answer is wrong
                     if (question!!.correctAnswer != mSelectedOptionPosition) {
                         answerView(mSelectedOptionPosition, R.drawable.wrong_option_border_bg)
+                    }
+                    else{
+                        mCorrectAnswers++
                     }
 
                     // This is for correct answer
@@ -155,7 +163,6 @@ class QuizQustionsActivity : AppCompatActivity(), View.OnClickListener {
                     } else {
                         btnSubmit?.text = "GO TO NEXT QUESTION"
                     }
-
                     mSelectedOptionPosition = 0
                 }
             }
